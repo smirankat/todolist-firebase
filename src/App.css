@@ -1,38 +1,83 @@
-.App {
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+input,
+button {
+  display: block;
   text-align: center;
+  font-size: 16px;
 }
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+input {
+  height: 30px;
 }
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+input::placeholder {
+  color: #ccc;
 }
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+.App {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  text-align: center;
+  background-color: #888;
+  min-height: 100vh;
 }
 
-.App-link {
+header {
+  font-size: 20px;
   color: #61dafb;
 }
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.add-todo form {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin: 30px;
+}
+.add-todo input {
+  margin: 5px;
+}
+.add-todo button {
+  width: 60px;
+  height: 30px;
+  background: #61dafb;
+  border: none;
+  margin: 5px;
+}
+.todo {
+  display: flex;
+  justify-content: center;
+  margin: 20px auto;
+  padding: 5px;
+  background: rgb(240, 238, 238);
+  border-radius: 5px;
+  flex-wrap: wrap;
+}
+.todo div {
+  padding: 5px;
+}
+.todo__file {
+  max-width: 280px;
+}
+.files {
+  display: flex;
+  justify-content: center;
+}
+img {
+  max-width: 100px;
+}
+.btn-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: end;
+}
+.btn {
+  background: #ff6c37;
+  border: none;
+  margin: 5px;
+  padding: 5px;
+  color: #fff;
+  border-radius: 3px;
 }

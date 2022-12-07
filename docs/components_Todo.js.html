@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: components/Todo.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: components/Todo.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * Todo module
+ * @module
+ */
+import React from "react";
+import { useEffect, useState } from "react";
+import { storage } from "../firebase";
+import {
+  ref,
+  uploadBytes,
+  listAll,
+  getDownloadURL,
+  deleteObject,
+} from "firebase/storage";
+import { v4 } from "uuid";
+import dayjs from "dayjs";
+
+/**
+ *  A component that show the item of the TodoList
+ * @component
+ */
+export default function Todo({
+  todo,
+  toggleComplete,
+  handleDelete,
+  handleEdit,
+}) {
+  const [newTitle, setNewTitle] = useState(todo.title);
+  const [newDescription, setNewDescription] = useState(todo.description);
+  const [newDate, setNewDate] = useState(todo.date);
+  const [fileUpload, setFileUpload] = useState(null);
+  const [files, setFiles] = useState([]);
+  const [fileUrls, setFileUrls] = useState([]);
+
+  const handleTitleChange = (e) => {
+    e.preventDefault();
+    if (todo.complete === true) {
+      setNewTitle(todo.title);
+    } else {
+      todo.title = "";
+      setNewTitle(e.target.value);
+    }
+  };
+  const handleDescriptionChange = (e) => {
+    e.preventDefault();
+    if (todo.complete === true) {
+      setNewDescription(todo.description);
+    } else {
+      todo.description = "";
+      setNewDescription(e.target.value);
+    }
+  };
+  const handleDateChange = (e) => {
+    e.preventDefault();
+    if (todo.complete === true) {
+      setNewDate(todo.date);
+    } else {
+      todo.date = "";
+      setNewDate(e.target.value);
+    }
+  };
+
+  const filesListRef = ref(storage, `${todo.title}/`);
+
+  const handleUpload = () => {
+    if (fileUpload === null) return;
+    const fileRef = ref(storage, `${todo.title}/${fileUpload.name + v4()}`);
+    uploadBytes(fileRef, fileUpload).then((snapshot) => {
+      setFiles((prev) => [...prev, snapshot.ref]);
+      getDownloadURL(snapshot.ref).then((url) => {
+        setFileUrls((prev) => [...prev, url]);
+      });
+    });
+  };
+
+  useEffect(() => {
+    listAll(filesListRef).then((res) => {
+      res.items.forEach((itemRef) => {
+        setFiles((prev) => [...prev, itemRef]);
+      });
+      res.items.forEach((item) => {
+        getDownloadURL(item).then((url) => {
+          setFileUrls((prev) => [...prev, url]);
+        });
+      });
+    });
+  }, []);
+
+  const handleDeleteFile = (index) => {
+    deleteObject(files[index]);
+    setFiles(files.filter((item) => item !== files[index]));
+    setFileUrls(fileUrls.filter((item) => item !== fileUrls[index]));
+  };
+
+  const validatedDate = () => {
+    const dateToCheck = dayjs(todo.date);
+    const now = dayjs();
+    let df = dateToCheck.diff(now);
+    // console.log(dayjs(dateToCheck));
+    // console.log(df);
+    if (df > 0) {
+      return todo.date;
+    } else {
+      return "task expired";
+    }
+  };
+
+  return (
+    &lt;div className="todo">
+      &lt;div>
+        &lt;div>
+          &lt;label htmlFor="title">Title&lt;/label>
+          &lt;input
+            className="todo__text"
+            style={{ textDecoration: todo.completed &amp;&amp; "line-through" }}
+            type="text"
+            name="title"
+            disabled={todo.completed}
+            value={todo.title === "" ? newTitle : todo.title}
+            onChange={handleTitleChange}
+          />
+        &lt;/div>
+        &lt;div>
+          &lt;label htmlFor="desc">Description&lt;/label>
+          &lt;input
+            className="todo__desc"
+            style={{ textDecoration: todo.completed &amp;&amp; "line-through" }}
+            type="text"
+            name="desc"
+            disabled={todo.completed}
+            value={todo.description === "" ? newDescription : todo.description}
+            onChange={handleDescriptionChange}
+          />
+        &lt;/div>
+        &lt;div>
+          &lt;label htmlFor="date">Date&lt;/label>
+          &lt;input
+            className="todo__date"
+            style={{ textDecoration: todo.completed &amp;&amp; "line-through" }}
+            type="text"
+            name="date"
+            placeholder="YYYY-MM-DD"
+            disabled={todo.completed}
+            value={todo.date === "" ? newDate : validatedDate()}
+            onChange={handleDateChange}
+          />
+        &lt;/div>
+      &lt;/div>
+      &lt;div>
+        &lt;div>
+          &lt;input
+            className="todo__file"
+            type="file"
+            disabled={todo.completed}
+            onChange={(e) => {
+              setFileUpload(e.target.files[0]);
+            }}
+          />
+          &lt;button className="btn-upload" onClick={() => handleUpload()}>
+            Upload file
+          &lt;/button>
+        &lt;/div>
+        &lt;div className="files">
+          {fileUrls.map((url, index) => {
+            return (
+              &lt;div key={v4()}>
+                &lt;img src={url} alt="file uploaded" />
+                &lt;button className="" onClick={() => handleDeleteFile(index)}>
+                  Delete File
+                &lt;/button>
+              &lt;/div>
+            );
+          })}
+        &lt;/div>
+      &lt;/div>
+      &lt;div className="btn-container">
+        &lt;button className="btn" onClick={() => toggleComplete(todo)}>
+          Complete
+        &lt;/button>
+        &lt;button
+          className="btn"
+          onClick={() => handleEdit(todo, newTitle, newDescription, newDate)}
+        >
+          Edit
+        &lt;/button>
+        &lt;button
+          className="btn"
+          onClick={() => handleDelete(todo, files, fileUrls)}
+        >
+          Delete
+        &lt;/button>
+      &lt;/div>
+    &lt;/div>
+  );
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Todo List Documents</a></h2><h3>Modules</h3><ul><li><a href="module-App.html">App</a></li><li><a href="module-components_AddTodo.html">components/AddTodo</a></li><li><a href="module-components_Title.html">components/Title</a></li><li><a href="module-components_Todo.html">components/Todo</a></li></ul><h3>Classes</h3><ul><li><a href="module-components_AddTodo.html">components/AddTodo</a></li><li><a href="module-components_Title.html">components/Title</a></li><li><a href="module-components_Todo.html">components/Todo</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.0</a> on Wed Dec 07 2022 23:20:44 GMT+0300 (GMT+03:00)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
