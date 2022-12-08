@@ -30,4 +30,4 @@ See the section about [deployment](https://facebook.github.io/create-react-app/d
 
 npm script that can generate the documentation
 
-You can find the documentation at todo-list\docs\index.html if open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+Open [http://localhost:5500/docs/index.html](http://localhost:5500/docs/index.html) to view it in your browser.
